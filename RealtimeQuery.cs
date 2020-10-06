@@ -31,6 +31,7 @@ namespace Parse.LiveQuery
         /// should the events be called on the main thread
         /// </summary>
         private readonly bool runOnMainThread;
+        private readonly bool enterFiresUpdate;
 
         /// <summary>
         /// The core subscriptiton for this realtime query
@@ -130,6 +131,10 @@ namespace Parse.LiveQuery
             {
                 if (OnUpdateListeners != null)
                 {
+                    foreach (var obj in watchedObjects.Values)
+                    {
+                        CallEventSingle(obj, value);
+                    }
                     OnUpdateListeners.Add(value);
                 }
             }
@@ -231,7 +236,10 @@ namespace Parse.LiveQuery
         /// <param name="query">The core query to base this request on</param>
         /// <param name="slowAndSafe">Should the system try catch each event called?</param>
         /// <param name="runOnMainThread">Shoud the system make sure the events will only be called on the main thread</param>
-        public RealtimeQuery(ParseQuery<T> query, bool slowAndSafe = false, bool runOnMainThread = true, ParseClient parseClient = null, ParseLiveQueryClient parseLiveQueryClient = null)
+        /// <param name="parseClient">an override to the parse client</param>
+        /// <param name="parseLiveQueryClient">an overide to the live query client</param>
+        /// <param name="enterFiresUpdate">when an object enters the query a update event will be called after enter</param>
+        public RealtimeQuery(ParseQuery<T> query, bool slowAndSafe = false, bool runOnMainThread = true, ParseClient parseClient = null, ParseLiveQueryClient parseLiveQueryClient = null, bool enterFiresUpdate = true)
         {
             if (!ContextCache.IsInitialized)
             {
@@ -250,6 +258,7 @@ namespace Parse.LiveQuery
             this.query = query;
             this.slowAndSafe = slowAndSafe;
             this.runOnMainThread = runOnMainThread;
+            this.enterFiresUpdate = enterFiresUpdate;
 
             // look to see if there is a ParseClientOverride
             if (parseClient == null)
@@ -409,6 +418,12 @@ namespace Parse.LiveQuery
             {
                 watchedObjects[obj.ObjectId] = obj;
                 CallEventList(obj, OnEnterListeners);
+
+                // if desired we should also send update events
+                if (enterFiresUpdate)
+                {
+                    Update(obj);
+                }
             }
         }
 
