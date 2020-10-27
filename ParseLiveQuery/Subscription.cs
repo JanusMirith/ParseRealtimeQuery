@@ -36,6 +36,11 @@ namespace Parse.LiveQuery {
         /// </summary>
         public event EventCallback<T> OnDelete;
 
+        /// <summary>
+        /// Called when there is an error
+        /// </summary>
+        public event ErrorCallback<T> OnError;
+
         internal Subscription(int requestId, ParseQuery<T> query) {
             RequestId = requestId;
             Query = query;
@@ -139,6 +144,7 @@ namespace Parse.LiveQuery {
             foreach (ErrorCallback<T> errorCallback in _errorCallbacks) {
                 errorCallback((ParseQuery<T>) queryObj, error);
             }
+            OnError?.Invoke((ParseQuery<T>)queryObj, error);
         }
 
         internal override void DidSubscribe(object queryObj) {

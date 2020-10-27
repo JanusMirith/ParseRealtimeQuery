@@ -315,6 +315,12 @@ namespace Parse.LiveQuery
             subscription.OnEnter += Sub_OnEnter;
             subscription.OnLeave += Sub_OnLeave;
             subscription.OnUpdate += Sub_OnUpdate;
+            subscription.OnError += Subscription_OnError;
+        }
+
+        private void Subscription_OnError(ParseQuery<T> query, LiveQueryException exception)
+        {
+            Debug.LogException(exception);
         }
 
         /// <summary>
