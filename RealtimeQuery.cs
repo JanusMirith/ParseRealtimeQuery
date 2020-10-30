@@ -279,6 +279,7 @@ namespace Parse.LiveQuery
                 this.parseLiveQueryClient = parseLiveQueryClient;
             }
 
+            MonobehaviourListener.onApplicationQuit += Destroy;
 
             // Setup the query
             SetupQuery();
