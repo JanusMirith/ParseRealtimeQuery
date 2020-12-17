@@ -281,8 +281,53 @@ namespace Parse.LiveQuery
 
             MonobehaviourListener.onApplicationQuit += Destroy;
 
+            MonobehaviourListener.onApplicationFocus += OnFocusChanged;
+
             // Setup the query
             SetupQuery();
+        }
+
+        private void OnFocusChanged(bool focus)
+        {
+            //Refocused the app
+            if (focus)
+            {
+                query.FindAsync().ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        Debug.Log(t.IsFaulted);
+                        Debug.Log(t.Exception);
+                        Debug.Log(t.Exception.Message);
+                    }
+                    else
+                    {
+                        if (t.Result.GetEnumerator() != null)
+                        {
+                            foreach (T obj in t.Result)
+                            {
+                                Enter(obj);
+                            }
+                        }
+                        List<T> objectsToKill = new List<T>();
+                        foreach(T obj in watchedObjects.Values)
+                        {
+                            if (t.Result.Contains<T>(obj))
+                            {
+                                // This is fine 
+                            }
+                            else
+                            {
+                                objectsToKill.Add(obj);
+                            }
+                        }
+                        for (int i = 0; i < objectsToKill.Count; i++)
+                        {
+                            Leave(objectsToKill[i]);
+                        }
+                    }
+                });
+            }
         }
 
         /// <summary>
@@ -304,8 +349,11 @@ namespace Parse.LiveQuery
                     {
                         foreach (T obj in t.Result)
                         {
+
                             Enter(obj);
                         }
+
+
                     }
                 }
             });
@@ -337,6 +385,9 @@ namespace Parse.LiveQuery
             OnLeaveListeners = new List<Action<T>>();
             OnDeleteListeners = new List<Action<T>>();
             CallEventList(OnDestroyListenters);
+
+            MonobehaviourListener.onApplicationFocus -= OnFocusChanged;
+            MonobehaviourListener.onApplicationQuit -= Destroy;
         }
 
         /// <summary>
