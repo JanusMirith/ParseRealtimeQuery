@@ -279,9 +279,9 @@ namespace Parse.LiveQuery
                 this.parseLiveQueryClient = parseLiveQueryClient;
             }
 
-            MonobehaviourListener.onApplicationQuit += Destroy;
+            Lifecycle.OnUnityQuit += Destroy;
 
-            MonobehaviourListener.onApplicationFocus += OnFocusChanged;
+            Lifecycle.OnUnityFocus += OnFocusChanged;
 
             // Setup the query
             SetupQuery();
@@ -386,8 +386,8 @@ namespace Parse.LiveQuery
             OnDeleteListeners = new List<Action<T>>();
             CallEventList(OnDestroyListenters);
 
-            MonobehaviourListener.onApplicationFocus -= OnFocusChanged;
-            MonobehaviourListener.onApplicationQuit -= Destroy;
+            Lifecycle.OnUnityQuit -= Destroy;
+            Lifecycle.OnUnityFocus -= OnFocusChanged;
         }
 
         /// <summary>
